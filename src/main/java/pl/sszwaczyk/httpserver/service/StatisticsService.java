@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import pl.sszwaczyk.httpserver.domain.Statistics;
 
+import javax.annotation.PreDestroy;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -18,6 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StatisticsService {
 
     private Statistics stats = new Statistics();
+
+    @PreDestroy
+    private void destroy() {
+        log.info("Saving statistics to file before destroy...");
+        snapshotToFile("./stats-on-exit.xlsx");
+    }
 
     public void updateStats(String userId) {
         stats.updateStats(userId);

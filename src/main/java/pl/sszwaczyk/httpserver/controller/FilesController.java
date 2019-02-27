@@ -2,11 +2,15 @@ package pl.sszwaczyk.httpserver.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import pl.sszwaczyk.httpserver.domain.User;
 import pl.sszwaczyk.httpserver.service.StatisticsService;
 import pl.sszwaczyk.httpserver.service.UserService;
@@ -16,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 @Slf4j
-@Controller
+@RestController
 public class FilesController {
 
     private final static int BYTES_DOWNLOAD = 1000;
@@ -31,7 +35,7 @@ public class FilesController {
     }
 
     @GetMapping(value = "/", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void getFile(@RequestParam("path") String path, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Resource> getFile(@RequestParam("path") String path, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ip = request.getRemoteAddr();
         User user = userService.getUserByIp(ip);
         if(user == null) {
@@ -44,11 +48,13 @@ public class FilesController {
         statisticsService.updateStats(user.getId());
 
         File file = openFile(path);
-        try(final InputStream myFile = new FileInputStream(file)) {
-            response.setHeader("Content-Length", String.valueOf(file.length()));
-            IOUtils.copy(myFile, response.getOutputStream());
-        }
+        Resource resource = prepareResource(file);
+        return ResponseEntity.ok(resource);
+    }
 
+    private Resource prepareResource(File file) throws FileNotFoundException {
+        final InputStream inputStream = new FileInputStream(file);
+        return new InputStreamResource(inputStream);
     }
 
     private File openFile(String path) {

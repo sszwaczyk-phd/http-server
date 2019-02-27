@@ -12,13 +12,14 @@ import pl.sszwaczyk.httpserver.service.StatisticsService;
 import pl.sszwaczyk.httpserver.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 
 @Slf4j
 @Controller
 public class FilesController {
+
+    private final static int BYTES_DOWNLOAD = 1000;
 
     private UserService userService;
 
@@ -30,8 +31,7 @@ public class FilesController {
     }
 
     @GetMapping(value = "/", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public @ResponseBody byte[] getFile(@RequestParam("path") String path,
-                                        HttpServletRequest request) throws IOException {
+    public void getFile(@RequestParam("path") String path, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String ip = request.getRemoteAddr();
         User user = userService.getUserByIp(ip);
         if(user == null) {
@@ -40,13 +40,19 @@ public class FilesController {
         }
         log.info("Got request from user " + user.getId() + " with ip " + ip);
 
-        File file = new File(path);
-        FileInputStream fis = new FileInputStream(file);
-        byte[] bytes = IOUtils.toByteArray(fis);
-
+        log.info("Updating statistics...");
         statisticsService.updateStats(user.getId());
 
-        return bytes;
+        File file = openFile(path);
+        try(final InputStream myFile = new FileInputStream(file)) {
+            response.setHeader("Content-Length", String.valueOf(file.length()));
+            IOUtils.copy(myFile, response.getOutputStream());
+        }
+
+    }
+
+    private File openFile(String path) {
+        return new File(path);
     }
 
 }

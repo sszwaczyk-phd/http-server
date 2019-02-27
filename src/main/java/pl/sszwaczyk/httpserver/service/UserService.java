@@ -2,6 +2,7 @@ package pl.sszwaczyk.httpserver.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.sszwaczyk.httpserver.domain.User;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -23,6 +25,7 @@ public class UserService {
 
     @PostConstruct
     private void init() throws IOException {
+        log.info("Loading users from file " + usersFile);
         File file = new File(usersFile);
         ObjectMapper objectMapper = new ObjectMapper();
         List<User> usersLists = objectMapper.readValue(file, new TypeReference<List<User>>(){});

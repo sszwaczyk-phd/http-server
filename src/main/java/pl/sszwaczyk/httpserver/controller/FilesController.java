@@ -16,7 +16,6 @@ import pl.sszwaczyk.httpserver.service.UserService;
 import pl.sszwaczyk.httpserver.utils.ThrottlingInputStream;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 @Slf4j

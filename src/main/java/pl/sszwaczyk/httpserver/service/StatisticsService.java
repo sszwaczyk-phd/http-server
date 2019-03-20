@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.sszwaczyk.httpserver.domain.Statistics;
 
@@ -18,12 +19,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class StatisticsService {
 
+    @Value("${exitStatsFile}")
+    private String exitStatsFile;
+
     private Statistics stats = new Statistics();
 
     @PreDestroy
     private void destroy() {
         log.info("Saving statistics to file before destroy...");
-        snapshotToFile("./stats-on-exit.xlsx");
+        snapshotToFile(exitStatsFile);
     }
 
     public void updateStats(String userId) {

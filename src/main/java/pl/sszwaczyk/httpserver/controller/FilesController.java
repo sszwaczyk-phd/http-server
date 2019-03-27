@@ -45,12 +45,14 @@ public class FilesController {
         }
         log.info("Got request from user " + user.getId() + " with ip " + ip);
 
-        log.info("Updating statistics...");
-        statisticsService.updateStats(user.getId());
+        synchronized (this) {
+            log.info("Updating statistics...");
+            statisticsService.updateStats(user.getId());
 
-        File file = openFile(path);
-        Resource resource = prepareResource(file, serviceService.getBandwidth());
-        return ResponseEntity.ok(resource);
+            File file = openFile(path);
+            Resource resource = prepareResource(file, serviceService.getBandwidth());
+            return ResponseEntity.ok(resource);
+        }
     }
 
     private Resource prepareResource(File file, Double bitsPerSecond) throws FileNotFoundException {

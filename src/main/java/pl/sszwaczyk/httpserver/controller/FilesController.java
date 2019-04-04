@@ -43,7 +43,7 @@ public class FilesController {
             log.error("Got request from unknown user with ip " + ip);
             throw new RuntimeException("User not found for ip " + ip);
         }
-        log.info("Got request from user " + user.getId() + " with ip " + ip);
+        log.info("Got request from user " + user.getId() + " with ip " + ip + " on port " + request.getRemotePort());
 
         synchronized (this) {
             log.info("Updating statistics...");

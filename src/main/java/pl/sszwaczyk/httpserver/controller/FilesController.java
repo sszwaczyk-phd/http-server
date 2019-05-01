@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,13 +52,13 @@ public class FilesController {
 
             File file = openFile(path);
             Resource resource = prepareResource(file, serviceService.getBandwidth());
-            return ResponseEntity.ok(resource);
+            return ResponseEntity.status(HttpStatus.OK).contentLength(file.length()).body(resource);
         }
     }
 
     private Resource prepareResource(File file, Double bitsPerSecond) throws FileNotFoundException {
         final InputStream inputStream = new FileInputStream(file);
-        final RateLimiter throttler = RateLimiter.create((bitsPerSecond * 1000000.0) / 8.0);
+        final RateLimiter throttler = RateLimiter.create((bitsPerSecond) / 8.0);
         final ThrottlingInputStream throttlingInputStream = new ThrottlingInputStream(inputStream, throttler);
         return new InputStreamResource(throttlingInputStream);
     }

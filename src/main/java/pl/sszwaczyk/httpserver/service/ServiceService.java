@@ -44,7 +44,7 @@ public class ServiceService {
             throw new RuntimeException("Cannot read required bandwidth from services config file");
         }
 
-        log.info("Required bandwidth initialized to " + bandwidth + " Mb/s");
+        log.info("Required bandwidth initialized to " + bandwidth + " b/s");
     }
 
     private List<String> getMachineIps() throws SocketException {
